@@ -211,30 +211,30 @@ treesit node itself."
 (defun css-in-js-mode--treesit-set-ranges (start end)
   "Updates the range info for tree-sitter parsers in this buffer."
   (when css-in-js-mode
-    (treesit-parser-set-included-ranges
-     (treesit-parser-create 'css-in-js)
-     (or
-      (seq-map
-       (lambda (el)
-         (cons
-          (+ (treesit-node-start (cdr el)) 1)
-          (- (treesit-node-end (cdr el)) 1)))
-       (seq-filter
-        (lambda (el)
-          (let* ((node (cdr el))
-                 (start (treesit-node-start node))
-                 (end (treesit-node-end node)))
-            (and
-	     (equal (treesit-node-type node)
-	            "template_string")
-             (> (- end start) 2)))) ; filter out empty template_string nodes
-        (treesit-query-capture
-         (treesit-buffer-root-node css-in-js-mode--major-mode-lang)
-         css-in-js-mode--region-queries
-         (point-min) (point-max))))
-      ;; providing nil to `treesit-parser-set-included-ranges' tells it to span
-      ;; the entire buffer, so instead we provide a dummy one
-      (list (cons (point-max) (point-max)))))))
+    (let ((cssjs-ranges
+           (seq-map
+            (lambda (el)
+              (cons
+               (+ (treesit-node-start (cdr el)) 1)
+               (- (treesit-node-end (cdr el)) 1)))
+            (seq-filter
+             (lambda (el)
+               (let* ((node (cdr el))
+                      (start (treesit-node-start node))
+                      (end (treesit-node-end node)))
+                 (and
+	          (equal (treesit-node-type node)
+	                 "template_string")
+                  (> (- end start) 2)))) ; filter out empty template_string nodes
+             (treesit-query-capture
+              (treesit-buffer-root-node css-in-js-mode--major-mode-lang)
+              css-in-js-mode--region-queries
+              (point-min) (point-max))))))
+      (if cssjs-ranges
+          (treesit-parser-set-included-ranges
+           (treesit-parser-create 'css-in-js)
+           cssjs-ranges)
+        (treesit-parser-delete (treesit-parser-create 'css-in-js))))))
 
 (defun css-in-js-mode--get-language-at-pos (pos)
   "Returns the treesit language at buffer position POS, either 'css-in-js or the
