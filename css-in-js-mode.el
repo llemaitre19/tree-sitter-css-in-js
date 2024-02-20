@@ -15,7 +15,7 @@
 
 
 (defconst css-in-js--treesit-library--archives
-  "https://github.com/orzechowskid/tree-sitter-css-in-js/releases/download/latest/"
+  "https://github.com/llemaitre19/tree-sitter-css-in-js/releases/download/latest/"
   "Location of archives containing tree-sitter CSS-in-JS shared libraries.")
 
 
